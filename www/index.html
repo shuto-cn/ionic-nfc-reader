@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <!--
 
@@ -28,59 +29,81 @@
     <script src="js/filters.js"></script>
     <script src="js/app.js"></script>
 </head>
+
 <body ng-app="ionicNFC" ng-controller="MainController">
 
-<ion-pane>
-    <ion-header-bar class="bar-stable">
-        <h1 class="title">NFC Reader</h1>
-        <button class="button button-clear button-positive" ng-click="clear()" ng-if="tag.id">Clear</button>
-    </ion-header-bar>
-    <ion-content>
-        <div ng-if="!tag.id">
-            <div class="card">
-                <div class="item item-text-wrap center">
-                    Scan a tag to being.
-                </div>
-            </div>
-        </div>
-        <div ng-if="tag.id">
-            <div class="card">
-                <div class="item item-text-wrap">
-                    <dl>
-                        <dt>Tag Id</dt>
-                        <dd>{{ tag.id | bytesToHexString }}</dd>
-                        <dt>Tag Type</dt>
-                        <dd>{{ tag.type }}</dd>
-                        <!-- TODO techTypes -->
-                        <dt>Max Size</dt>
-                        <dd>{{ tag.maxSize }} bytes</dd>
-                        <dt>Is Writable</dt>
-                        <dd>{{ tag.isWritable }}</dd>
-                        <dt>Can Make Read Only</dt>
-                        <dd>{{ tag.canMakeReadOnly }}</dd>
-                    </dl>
-                    <div class="card" ng-repeat="record in tag.ndefMessage">
-                        <div class="item item-divider">
-                            Record {{$index + 1}} <br/>
-                        </div>
-                        <div class="item item-text-wrap">
-                            <dl>
-                                <dt>TNF</dt>
-                                <dd>{{ record.tnf | tnfToString }}</dd>
-                                <dt>Record Type</dt>
-                                <dd>{{ record.type | bytesToString }}</dd>
-                                <dt ng-if="record.id">Record Id</dt>
-                                <dd ng-if="record.id">{{ record.id | bytesToString }}</dd>
-                                <dt>Payload</dt>
-                                <dd>{{ record | decodePayload }}</dd>
-                            </dl>
+    <ion-pane>
+        <ion-header-bar class="bar-stable">
+            <h1 class="title">NFC Reader & Writer</h1>
+            <button class="button button-clear button-positive" ng-click="clear()"
+                ng-if="tag.id || isIOS">Clear</button>
+        </ion-header-bar>
+        <ion-content>
+            <div ng-show="nfc.initialized">
+                <div ng-if="!tag.id && !isIOS">
+                    <div class="card">
+                        <div class="item item-text-wrap center">
+                            Scan a tag to being.
                         </div>
                     </div>
                 </div>
+                <div ng-if="isIOS" class="padding">
+                    <div class="button button-block button-outline button-balanced" ng-click="beginSession()">
+                        Click to Scan.
+                    </div>
+                </div>
+                <div ng-if="tag.id || isIOS">
+                    <div class="card">
+                        <div class="item item-text-wrap">
+                            <dl>
+                                <dt>Tag Id</dt>
+                                <dd>{{ tag.id | bytesToHexString }} &nbsp;</dd>
+                                <dt>Tag Type</dt>
+                                <dd>{{ tag.type }} &nbsp;</dd>
+                                <!-- TODO techTypes -->
+                                <dt>Max Size</dt>
+                                <dd>{{ tag.maxSize }} bytes</dd>
+                                <dt>Is Writable</dt>
+                                <dd>{{ tag.isWritable }} &nbsp;</dd>
+                                <dt>Can Make Read Only</dt>
+                                <dd>{{ tag.canMakeReadOnly }} &nbsp;</dd>
+                            </dl>
+                            <div class="card" ng-repeat="record in tag.ndefMessage">
+                                <div class="item item-divider">
+                                    Record {{$index + 1}} <br />
+                                </div>
+                                <div class="item item-text-wrap">
+                                    <dl>
+                                        <dt>TNF</dt>
+                                        <dd>{{ record.tnf | tnfToString }} &nbsp;</dd>
+                                        <dt>Record Type</dt>
+                                        <dd>{{ record.type | bytesToString }} &nbsp;</dd>
+                                        <dt ng-if="record.id">Record Id</dt>
+                                        <dd ng-if="record.id">{{ record.id | bytesToString }} &nbsp;</dd>
+                                        <dt>Payload</dt>
+                                        <dd>{{ record | decodePayload }} &nbsp;</dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="button-bar padding" ng-hide="isIOS">
+                        <div class="button button-calm" ng-click="write()"> 写测试 </div>
+                        <div class="button button-assertive" ng-click="erase()"> 删测试 </div>
+                    </div>
+                </div>
             </div>
-
-        </div>
-    </ion-content>
-</ion-pane>
+            <div ng-if="!nfc.initialized">
+                <button class="button" ng-click="initialize()">初始化</button>
+            </div>
+        </ion-content>
+    </ion-pane>
+    <script src="lib/vconsole.min.js"></script>
+    <script type="text/javascript">
+        var vConsole = new VConsole({
+            defaultPlugins: ['system', 'network']
+        });
+    </script>
 </body>
+
 </html>
